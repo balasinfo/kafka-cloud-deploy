@@ -7,9 +7,9 @@ variable "environment" {
   description = "environment to configure"
 }
 
-variable "app_name" {
-  description = "application name"
-  default = "infra"
+variable "cluster_name" {
+  description = "cluster name"
+  default = "kafka"
 }
 
 variable "brokers_per_az" {
@@ -152,8 +152,3 @@ variable "cloudwatch_alarm_arn" {
   description = "cloudwatch alarm ARN"
 }
 
-variable "kafka_broker_alb_arn" {
-  type = string
-  description = "if set we add the kafka-server instances to the alb target group"
-  default = ""
-}

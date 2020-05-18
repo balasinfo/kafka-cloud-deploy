@@ -1,0 +1,62 @@
+#cloud-config
+locale: en_US.UTF-8
+output: { all: '| tee -a /var/log/cloud-init-output.log' }
+
+write_files:
+  - content: |
+     #!/usr/bin/env bash
+     set -ex
+     IFS=,
+     REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region`
+     export AWS_DEFAULT_REGION=$${REGION}
+
+     AZ=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .availabilityZone`
+
+     ZK_ADDRS="$(aws ec2 describe-instances --filter "Name=tag:Name,Values=*-zk-*" --query 'Reservations[].Instances[].[PrivateIpAddress]' --output text | grep -v '^None$' | paste -sd ',' -)"
+
+     IP_ADDR=($${ZK_ADDRS})
+
+     cat /dev/null > /tmp/ip_addrs.txt
+     for i in {1..${count}}; do
+       echo "$i:$${IP_ADDR[$((i-1))]}:2888:3888" >> /tmp/ip_addrs.txt
+     done
+
+     IP_ADDR_FILE=`cat /tmp/ip_addrs.txt | paste -sd ',' -`
+     zookeeper_config -E -i ${id} -n `echo $${IP_ADDR_FILE}` -S
+
+    path: /root/init_zookeeper_config.sh
+    permissions: '0777'
+  - content: |
+      #!/usr/bin/env bash
+      #
+      # Script to check the process and to post the status to CloudWatch.
+      set -ex
+
+      REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region`
+      # get the process status
+      value=`ps -ef | grep ${service} | grep -v grep | grep -v $0 | wc -l`
+
+      # post the status
+      aws --region $${REGION} cloudwatch put-metric-data --metric-name ${metric} \
+          --namespace CMXAM/Kafka --value $value \
+          --dimensions InstanceId=`curl http://169.254.169.254/latest/meta-data/instance-id` \
+          --timestamp `date '+%FT%T.%N%Z'`
+
+    path: /srv/${service}/${service}-status.sh
+    permissions: '0700'
+  - content: |
+      while [ ! -f /root/.provisioning-finished ]
+      do
+          echo -n "#"
+          sleep 1
+      done
+    path: /root/ensure-provisioned.sh
+    permissions: '0777'
+
+runcmd:
+  - sh /root/init_zookeeper_config.sh
+  - touch /root/.provisioning-finished && chmod 644 /root/.provisioning-finished
+  - sh /root/ensure-provisioned.sh
+  - echo '* * * * * /srv/${service}/${service}-status.sh' > /tmp/crontab
+  - crontab -u ${service} /tmp/crontab
+  - rm /tmp/crontab

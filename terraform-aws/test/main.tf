@@ -62,7 +62,7 @@ module "kafka_volumes" {
 module "kafka" {
   source = "./.."
   environment = var.environment
-  app_name = "infra"
+  cluster_name = "infra"
   ebs_volume_ids = flatten(module.kafka_volumes.volume_ids)
   subnet_ids = module.network.private_subnet_ids
   static_subnet_ids = module.network.private_subnet_ids

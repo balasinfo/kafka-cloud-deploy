@@ -3,22 +3,6 @@ output "key_name" {
   description = "Name of SSH key"
 }
 
-#output "public_key" {
-#  value = module.ssh_key_pair.public_key
-#  description = "Content of the generated public key"
-#}
-#
-#output "private_key" {
-#  sensitive = true
-#  value = module.ssh_key_pair.private_key
-#  description = "Content of the generated private key"
-#}
-#
-#output "public_key_filename" {
-#  description = "Public Key Filename"
-#  value       = module.ssh_key_pair.public_key_filename
-#}
-
 output "private_key_filename" {
   description = "Private Key Filename"
   value       = module.ssh_key_pair.private_key_filename
@@ -32,4 +16,9 @@ output "bastion_ssh_spec" {
 output "zk_connect" {
   value = module.kafka.zk_connect
   description = "ZooKeeper private ip's that are used to connect to"
+}
+
+output "kafka_bootstrap_server_endpoint" {
+  value = module.kafka_route53_cluster_hostname.hostname
+  description = "Route 53 endpoint to connect to kafka brokers outside of VPC"
 }

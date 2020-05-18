@@ -1,17 +1,13 @@
-# Deploy Elasticsearch on the cloud easily
+# Deploy Kafka on the cloud easily
 
-This repository contains a set of tools and scripts to deploy an Elasticsearch cluster on the cloud, using best-practices and state of the art tooling.
-
-***Note:*** This branch supports Elasticsearch 7.x only. For other Elasticsearch versions see [elasticsearch-5.x](https://github.com/BigDataBoutique/elasticsearch-cloud-deploy/tree/elasticsearch-5.x) and [elasticsearch-6.x](https://github.com/BigDataBoutique/elasticsearch-cloud-deploy/tree/elasticsearch-6.x) branches.
+This repository contains a set of tools and scripts to deploy an Kafka cluster on the cloud, using best-practices and state of the art tooling.
 
 You need to use the latest version of Terraform and Packer for all features to work correctly.
 
 Features:
 
 * Deployment of data and master nodes as separate nodes
-* Client node with Kibana, Cerebro, Grafana and authenticated Elasticsearch access
-* DNS and load-balancing access to client nodes
-* Sealed from external access, only accessible via password-protected external facing client nodes
+* DNS and load-balancing access to broker nodes
 * AWS deployment support (under `terraform-aws`)
 
 ## Usage

@@ -52,8 +52,8 @@ only_kafka:
 	@echo "Builds bastion for Kafka in $(ENV)"
 	@terraform apply -target module.kafka -var-file workspace-variables/$(ENV).tfvars
 
-all: bastion_server kafka
-install: bastion_server kafka
+all: bastion_server kafka_route53
+install: bastion_server kafka_route53
 
 bastion: bastion_server
 
@@ -73,21 +73,21 @@ kafka_volumes:
 	@echo "Builds ebs volumes for Kafka in $(ENV)"
 	@terraform apply -auto-approve -target module.kafka_volumes -var-file workspace-variables/$(ENV).tfvars
 
-kafka: kafka_route53
+kafka: kafka_volumes
 	@echo "Builds core kafka module for Kafka in $(ENV)"
 	@terraform apply -auto-approve -target module.kafka -var-file workspace-variables/$(ENV).tfvars
 
-kafka_route53: kafka_broker_alb
+kafka_route53: kafka_elb_http
 	@echo "Builds kafka route53 broker hostname for Kafka in $(ENV)"
 	@terraform apply -auto-approve -target module.kafka_route53_cluster_hostname -var-file workspace-variables/$(ENV).tfvars
 
-kafka_broker_alb: kafka_volumes
+kafka_elb_http: kafka
 	@echo "Builds kafka load balancer for Kafka in $(ENV)"
-	@terraform apply -auto-approve -target module.kafka_broker_alb -var-file workspace-variables/$(ENV).tfvars
+	@terraform apply -auto-approve -target module.kafka_elb_http -var-file workspace-variables/$(ENV).tfvars
 
 
 # .PHONEY: bastion_server kafka
-destroy: destroy_kafka destroy_bastion_server
+destroy: destroy_kafka_elb_http destroy_bastion_server
 
 destroy_ssh_key_pair:
 	@echo "Destroy ssh_key_pair for Kafka in $(ENV)"
@@ -101,17 +101,17 @@ destroy_kafka_volumes:
 	@echo "Destroy volumes for Kafka in $(ENV)"
 	@terraform destroy -force -target module.kafka_volumes -var-file workspace-variables/$(ENV).tfvars
 
-destroy_kafka: destroy_kafka_route53
+destroy_kafka: destroy_kafka_volumes
 	@echo "Destroy core kafka module for Kafka in $(ENV)"
 	@terraform destroy -force -target module.kafka -var-file workspace-variables/$(ENV).tfvars
 
-destroy_kafka_route53: destroy_kafka_broker_alb
+destroy_kafka_route53: destroy_kafka
 	@echo "Destroy kafka route53 broker hostname for Kafka in $(ENV)"
 	@terraform destroy -force -target module.kafka_route53_cluster_hostname -var-file workspace-variables/$(ENV).tfvars
 
-destroy_kafka_broker_alb: destroy_kafka_volumes
+destroy_kafka_elb_http: destroy_kafka_route53
 	@echo "Destroy kafka load balancer  for Kafka in $(ENV)"
-	@terraform destroy -force -target module.kafka_broker_alb -var-file workspace-variables/$(ENV).tfvars
+	@terraform destroy -force -target module.kafka_elb_http -var-file workspace-variables/$(ENV).tfvars
 
 
 # destroy:

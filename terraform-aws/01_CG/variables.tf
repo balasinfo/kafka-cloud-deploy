@@ -172,9 +172,14 @@ variable "shared_aws_account_ids" {
   #default     = []
 }
 
-variable "image_filter" {
+variable "base_image_filter" {
   type        = string
   description = "Search string for instance's image"
+}
+
+variable "kafka_image_filter" {
+  type        = string
+  description = "Search string for packer prepared instance's image"
 }
 
 variable "enable_proxyless_ssh" {

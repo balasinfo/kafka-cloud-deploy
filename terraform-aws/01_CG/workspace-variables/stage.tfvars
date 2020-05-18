@@ -20,7 +20,8 @@ public_subnet_ids  = ["subnet-03757d0625a99888a", "subnet-0bb23ce239538fa92", "s
 private_subnet_ids = ["subnet-3c69ca58", "subnet-0df5207b", "subnet-523cdc0a"]
 
 # the ability to add additional existing security groups. In our case
-additional_security_groups = ["sg-dd25cdba", "sg-988c57e3", "sg-44263623"]
+# traffic from office and CG-DC only
+additional_security_groups = ["sg-dd25cdba", "sg-3db3a65a"]
 shared_aws_account_ids     = ["807891339983"]
 
 domain                       = "kafka.cgcloud.eu"
@@ -33,8 +34,9 @@ route53_zone_public_id       = "Z2CP8DRLO76FWF"
 # Project specific settings
 ##############################################################################
 #ami                      = "ami-00e8b55a2e841be44"
-image_filter             = "amzn2-ami-hvm-2.0.20*0-x86_64-gp2"
-user                     = "ec2-user"
+base_image_filter        = "debian-stretch-*"
+kafka_image_filter       = "kafka-2.5.0*"
+user                     = "admin"
 iam_instance_profile     = ""
 #private_key_path         = "~/.ssh/sol_kafka.pem"
 #bastion_private_key_path = ""
